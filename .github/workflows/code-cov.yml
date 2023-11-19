@@ -1,0 +1,58 @@
+name: Run Pytest
+
+on:
+  pull_request:
+    branches:
+      - 'master'
+      - 'develop'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Repo
+        uses: actions/checkout@v3
+        with:
+          token: "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-in-project: true
+          virtualenvs-create: true
+
+      - name: Install dependencies
+        run: |
+          poetry --version
+          poetry lock --no-update
+          poetry install
+
+      - name: Run pytest
+        run: poetry run pytest --cov=./ --cov-report=xml
+
+      - name: Build coverage file
+        run: |
+          poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=src tests/ | tee pytest-coverage.txt
+
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+          title: Code Coverage Report 😶‍🌫️
+          badge-title: code-cov
+          hide-badge: false
+          hide-report: false
+          create-new-comment: false
+          hide-comment: false
+          report-only-changed-files: false
+          remove-link-from-badge: false
+          unique-id-for-comment: python3.10
+          junitxml-path: ./pytest.xml
+          junitxml-title: JUnit Test Review

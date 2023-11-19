@@ -1,0 +1,388 @@
+[tool.poetry]
+name = "python_package"
+version = "0.0.0"
+description = "Hyper-modern python package framework."
+authors = ["Jennings Fantini <jennings@humblfinance.io>"]
+readme = "README.md"
+license = "Proprietary"
+keywords = ["python", "package", "template", "modern"]
+packages = [
+    { include = "python_package", from = "src" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11"
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9.10,<=3.12.0"
+polars = "^0.19.3"
+pyarrow = "^14.0.0"
+pandera = {extras = ["io"], version = "^0.17.2"}
+toml = "^0.10.2"
+pydantic = "^2.5.1"
+
+
+[tool.poetry.group.dev.dependencies]
+commitizen = "^3.12.0"
+pytest = "^7.4.2"
+pytest-cov = "^4.1.0"
+black = "^23.9.1"
+pytest-mock = "^3.12.0"
+ipython = "^8.17.2"
+comm = "^0.2.0"
+ruff = "^0.1.6"
+nox = "^2023.4.22"
+tqdm = "^4.66.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.commitizen]
+name = "cz_customize"
+version = "0.0.0"
+tag_format = "v$version"
+update_changelog_on_bump = true
+annotated_tag = true
+major_version_zero = true
+version_files = [
+    "pyproject.toml:^version",
+    #"./src/python_package/__version__.py"
+]
+path = ".cz-config.js"
+
+[tool.commitizen.customize]
+# message_template = "{{change_type}}:{% if show_message %} {{message}}{% endif %}"
+example = "feat: this feature enables customizing through pyproject.toml file"
+schema = """
+<type>(<scope>): <subject> \n
+<BLANK LINE> \n
+<body> \n
+<BLANK LINE> \n
+(BREAKING CHANGE: )<breaking> \n
+<BLANK LINE> \n
+(ISSUES: )<footer>
+"""
+schema_pattern = "(?s)(📦️ build|🎡 ci|📝 docs|✨ feat|🐛 fix|🚑 hotfix|⚡ perf|♻️ refactor|🎨 style|✅ test|🔨 chore|⏪️ revert|bump|🚧 WIP|➕ dep|➖ dep)(\\(\\S+\\))?!?:( [^\\n\\r]+)((\\n\\n.*)|(\\s*))?$"
+bump_pattern = "^(✨ feat|🐛 fix|🚑 hotfix|⚡ perf|🔧 refactor|bump)"
+bump_map = {"BREAKING CHANGE" = "MAJOR", "✨ feat" = "MINOR", "🐛 fix" = "PATCH", "🚑 hotfix" = "PATCH", "⚡ perf" = "PATCH", "♻️ refactor" = "PATCH"}
+change_type_order = ["BREAKING CHANGE", "✨ feat", "🐛 fix", "🚑 hotfix", "♻️ refactor", "⚡ perf", "📦️ build", "🎨 style", "📝 docs", "➕ dep", "➖ dep"]
+info_path = "cz_customize_info.txt"
+info = """
+This is customized commitizen info
+"""
+commit_parser = "^(?P<change_type>📦️ build|🎡 ci|📝 docs|✨ feat|🐛 fix|🚑 hotfix|⚡ perf|♻️ refactor|🎨 style|✅ test|🔨 chore|⏪️ revert|bump|🚧 WIP|➕ dep|➖ dep):\\s(?P<message>.*)?"
+changelog_pattern = "^(📦️ build|🎡 ci|📝 docs|✨ feat|🐛 fix|🚑 hotfix|⚡ perf|♻️ refactor|🎨 style|✅ test|🔨 chore|⏪️ revert|bump|🚧 WIP|➕ dep|➖ dep)?(!)?"
+change_type_map = {"📦️ build" = "📦️ Build", "🎡 ci" = "🎡 CI", "📝 docs" = "📝 Docs", "✨ feat" = "✨ Feat", "🐛 fix" = "🐛 Fix", "🚑 hotfix" = "🚑 Hotfix", "⚡ perf" = "⚡ Perf", "♻️ refactor" = "♻️ Refactor", "🎨 style" = "🎨 Style", "✅ test" = "✅ Test", "🔨 chore" = "🔨 Chore", "⏪️ revert" = "⏪️ Revert", "bump" = "🔼 Bump", "🚧 WIP" = "🚧 WIP", "➕ dep" = "➕ Added Dependency", "➖ dep" = "➖ Removed Dependency"}
+
+[tool.ruff]
+line-length = 80
+select = [
+"E",   # pycodestyle
+"F",   # pyflakes
+"UP",  # pyupgrade,
+"I",   # isort
+"B",   # bugbear
+]
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+unfixable = []
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+per-file-ignores = {}
+
+[tool.ruff.mccabe]
+# Flag errors (`C901`) whenever the complexity level exceeds 10.
+max-complexity = 10
+
+
+[project.urls]
+Documentation = "https://github.com/microsoft/python-package-template/tree/main#readme"
+Source = "https://github.com/microsoft/python-package-template"
+Tracker = "https://github.com/microsoft/python-package-template/issues"
+
+[tool.bandit]
+exclude_dirs = ["build","dist","tests","scripts"]
+number = 4
+recursive = true
+targets = "src"
+
+[tool.black]
+line-length = 120
+fast = true
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+fail_under = 100
+
+[tool.flake8]
+max-line-length = 80
+select = "F,E,W,B,B901,B902,B903"
+exclude = [
+    ".eggs",
+    ".git",
+    ".tox",
+    "nssm",
+    "obj",
+    "out",
+    "packages",
+    "pywin32",
+    "tests",
+    "swagger_client"
+]
+ignore = [
+    "E722",
+    "B001",
+    "W503",
+    "E203"
+]
+
+[tool.pyright]
+include = ["src"]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+]
+venv = "env37"
+reportMissingImports = true
+reportMissingTypeStubs = false
+pythonVersion = "3.7"
+pythonPlatform = "Linux"
+executionEnvironments = [
+  { root = "src" }
+]
+
+[tool.pytest.ini_options]
+addopts = "--cov-report xml:coverage.xml --cov src --cov-fail-under 0 --cov-append -m 'not integration'"
+pythonpath = [
+  "src"
+]
+testpaths = "tests"
+junit_family = "xunit2"
+markers = [
+    "integration: marks as integration test",
+    "notebooks: marks as notebook test",
+    "gpu: marks as gpu test",
+    "spark: marks tests which need Spark",
+    "slow: marks tests as slow",
+    "unit: fast offline tests",
+]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py, integration, spark, all
+
+[testenv]
+commands =
+    pytest -m "not integration and not spark" {posargs}
+
+[testenv:integration]
+commands =
+    pytest -m "integration" {posargs}
+
+[testenv:spark]
+extras = spark
+setenv =
+       PYSPARK_DRIVER_PYTHON = {envpython}
+       PYSPARK_PYTHON = {envpython}
+commands =
+    pytest -m "spark" {posargs}
+
+[testenv:all]
+extras = all
+setenv =
+       PYSPARK_DRIVER_PYTHON = {envpython}
+       PYSPARK_PYTHON = {envpython}
+commands =
+    pytest {posargs}
+"""
+
+[tool.pylint]
+extension-pkg-whitelist= [
+    "numpy",
+    "torch",
+    "cv2",
+    "pyodbc",
+    "pydantic",
+    "ciso8601",
+    "netcdf4",
+    "scipy"
+]
+ignore="CVS"
+ignore-patterns="test.*?py,conftest.py"
+init-hook='import sys; sys.setrecursionlimit(8 * sys.getrecursionlimit())'
+jobs=0
+limit-inference-results=100
+persistent="yes"
+suggestion-mode="yes"
+unsafe-load-any-extension="no"
+
+[tool.pylint.'MESSAGES CONTROL']
+enable="c-extension-no-member"
+
+[tool.pylint.'REPORTS']
+evaluation="10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)"
+output-format="text"
+reports="no"
+score="yes"
+
+[tool.pylint.'REFACTORING']
+max-nested-blocks=5
+never-returning-functions="sys.exit"
+
+[tool.pylint.'BASIC']
+argument-naming-style="snake_case"
+attr-naming-style="snake_case"
+bad-names= [
+    "foo",
+    "bar"
+]
+class-attribute-naming-style="any"
+class-naming-style="PascalCase"
+const-naming-style="UPPER_CASE"
+docstring-min-length=-1
+function-naming-style="snake_case"
+good-names= [
+    "i",
+    "j",
+    "k",
+    "ex",
+    "Run",
+    "_"
+]
+include-naming-hint="yes"
+inlinevar-naming-style="any"
+method-naming-style="snake_case"
+module-naming-style="any"
+no-docstring-rgx="^_"
+property-classes="abc.abstractproperty"
+variable-naming-style="snake_case"
+
+[tool.pylint.'FORMAT']
+ignore-long-lines="^\\s*(# )?.*['\"]?<?https?://\\S+>?"
+indent-after-paren=4
+indent-string='    '
+max-line-length=120
+max-module-lines=1000
+single-line-class-stmt="no"
+single-line-if-stmt="no"
+
+[tool.pylint.'LOGGING']
+logging-format-style="old"
+logging-modules="logging"
+
+[tool.pylint.'MISCELLANEOUS']
+notes= [
+    "FIXME",
+    "XXX",
+    "TODO"
+]
+
+[tool.pylint.'SIMILARITIES']
+ignore-comments="yes"
+ignore-docstrings="yes"
+ignore-imports="yes"
+min-similarity-lines=7
+
+[tool.pylint.'SPELLING']
+max-spelling-suggestions=4
+spelling-store-unknown-words="no"
+
+[tool.pylint.'STRING']
+check-str-concat-over-line-jumps="no"
+
+[tool.pylint.'TYPECHECK']
+contextmanager-decorators="contextlib.contextmanager"
+generated-members="numpy.*,np.*,pyspark.sql.functions,collect_list"
+ignore-mixin-members="yes"
+ignore-none="yes"
+ignore-on-opaque-inference="yes"
+ignored-classes="optparse.Values,thread._local,_thread._local,numpy,torch,swagger_client"
+ignored-modules="numpy,torch,swagger_client,netCDF4,scipy"
+missing-member-hint="yes"
+missing-member-hint-distance=1
+missing-member-max-choices=1
+
+[tool.pylint.'VARIABLES']
+additional-builtins="dbutils"
+allow-global-unused-variables="yes"
+callbacks= [
+    "cb_",
+    "_cb"
+]
+dummy-variables-rgx="_+$|(_[a-zA-Z0-9_]*[a-zA-Z0-9]+?$)|dummy|^ignored_|^unused_"
+ignored-argument-names="_.*|^ignored_|^unused_"
+init-import="no"
+redefining-builtins-modules="six.moves,past.builtins,future.builtins,builtins,io"
+
+[tool.pylint.'CLASSES']
+defining-attr-methods= [
+    "__init__",
+    "__new__",
+    "setUp",
+    "__post_init__"
+]
+exclude-protected= [
+    "_asdict",
+    "_fields",
+    "_replace",
+    "_source",
+    "_make"
+]
+valid-classmethod-first-arg="cls"
+valid-metaclass-classmethod-first-arg="cls"
+
+[tool.pylint.'DESIGN']
+max-args=5
+max-attributes=7
+max-bool-expr=5
+max-branches=12
+max-locals=15
+max-parents=7
+max-public-methods=20
+max-returns=6
+max-statements=50
+min-public-methods=2
+
+[tool.pylint.'IMPORTS']
+allow-wildcard-with-all="no"
+analyse-fallback-blocks="no"
+deprecated-modules="optparse,tkinter.tix"
+
+[tool.pylint.'EXCEPTIONS']
+overgeneral-exceptions= [
+    "BaseException",
+    "Exception"
+]
