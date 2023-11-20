@@ -25,6 +25,7 @@
     "git.autofetch": true,
     "files.autoSave": "onFocusChange",
     "cSpell.words": [
+        "autobook",
         "backtest",
         "bordercolor",
         "borderwidth",
@@ -47,6 +48,8 @@
         "investmnet",
         "ivol",
         "klass",
+        "Libgen",
+        "Libject",
         "modebar",
         "nbinsx",
         "obbh",

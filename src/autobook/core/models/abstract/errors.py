@@ -17,7 +17,7 @@ class WrongArgumentsError(BaseException):
         super().__init__(str(original))
 
 
-class HumblDataError(BaseException):
+class AutoBookError(BaseException):
     """Wrong Arguments Error."""
 
     def __init__(self, original: Optional[Union[str, Exception]] = None):
