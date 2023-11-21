@@ -1,4 +1,3 @@
-
 from typing import OrderedDict
 
 import pandas as pd
@@ -21,6 +20,7 @@ class LibgenRecords(pa.DataFrameModel):
 
     class Config:
         coerce = True
+
 
 # Usage
 # df = pd.read_csv('path_to_your_file.csv')
@@ -54,3 +54,10 @@ class LibgenDataFrame(pd.DataFrame):
             ) from exc
 
         return from_pandas(self.reset_index())
+
+    def clean_title(self):
+        """
+        Cleans the title column by extracting all the text before 'ISBN:' for each row in the dataframe.
+        """
+        self["title"] = self["title"].apply(lambda x: x.split("ISBN:", 1)[0])
+        return self

@@ -40,7 +40,7 @@ module.exports = {
     useAI: false,
     aiNumber: 1,
     themeColorCode: "",
-    scopes: [{ name: 'tools-mc' }, { name: 'tools-vap' }, { name: 'core' }, { name: 'performance' }, { name: 'plotting' }, { name: 'models' }, { name: 'volatility' }, { name: 'helpers' }, { name: 'credentials' }, { name: 'constants' }, { name: 'tests' }],
+    scopes: [{ name: 'core' }, { name: 'models' }, { name: 'helpers' }, { name: 'credentials' }, { name: 'constants' }, { name: 'tests' }, { name: 'libgen' }, { name: 'convert' }, { name: 'tts' }],
     allowCustomScopes: true,
     allowEmptyScopes: true,
     customScopesAlign: "bottom",
