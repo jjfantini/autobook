@@ -27,7 +27,7 @@ jobs:
       - name: Generate Release
         uses: softprops/action-gh-release@v1
         with:
-          name: humbldata v${{ env.REVISION }}
+          name: autobook v${{ env.REVISION }}
           body_path: "body.md"
           tag_name: v${{ env.REVISION }}
         env:
