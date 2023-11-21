@@ -29,23 +29,6 @@ def autobook():
     if st.session_state.search_results is not None:
         st.dataframe(st.session_state.search_results)
 
-    # Filter button and popup
-    if st.button("Filter"):
-        with st.expander("Enter filter details"):
-            author = st.text_input("Author", key="author_filter")
-            title = st.text_input("Title", key="title_filter")
-            if st.button("Apply Filter"):
-                st.session_state.libgen_instance.filter(
-                    author=author, title=title
-                )
-                st.session_state.filtered_results = (
-                    st.session_state.libgen_instance.get_filtered_results()
-                )
-
-    # Always display filtered results if they are available
-    if st.session_state.filtered_results is not None:
-        st.dataframe(st.session_state.filtered_results)
-
     # Select row and Download button
     if st.session_state.filtered_results is not None:
         selected_row_index = st.selectbox(

@@ -1,4 +1,5 @@
 import os
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -6,7 +7,7 @@ import requests
 from autobook.core.constants import PATH_CWD
 from autobook.core.frame import LibgenDataFrame
 from autobook.core.models.abstract.errors import AutoBookError
-from grab_fork_from_libgen import LibgenSearch
+from grab_fork_from_libgen import LibgenSearch, Metadata
 from typing_extensions import Literal
 
 
@@ -59,6 +60,9 @@ class Libgen:
         self.topic = topic
         self.clean = clean
 
+        self.results = None
+        self.filtered_results = None
+
     def search(self):
         """
         Performs a search on Libgen.
@@ -73,6 +77,19 @@ class Libgen:
         self.res = LibgenSearch(self.topic, q=self.q, language="English")
         res_ol = self.res.get_results()
         self.results = LibgenDataFrame(list(res_ol.values()))
+
+        if self.clean:
+            self._clean()
+
+        return self
+
+    def _clean(self):
+        """
+        Cleans the title column by extracting all the text before 'ISBN:' for each row in the dataframe.
+        """
+        self.results["title"] = self.results["title"].apply(
+            lambda x: x.split("ISBN:", 1)[0]
+        )
         return self
 
     def get_results(self):
@@ -86,8 +103,7 @@ class Libgen:
         """
         if self.results is None:
             raise AutoBookError(
-                """You need to run .search() before accessing
-            the results"""
+                "You need to run .search() before accessing the results"
             )
         return self.results
 
@@ -111,8 +127,6 @@ class Libgen:
         DataFrame
             The filtered dataframe.
         """
-        if self.clean:
-            self._clean()
 
         if author:
             # Split the author string into words and create a regex pattern that
@@ -133,15 +147,6 @@ class Libgen:
         self.filtered_results = self.results[author_mask & title_mask]
         return self
 
-    def _clean(self):
-        """
-        Cleans the title column by extracting all the text before 'ISBN:' for each row in the dataframe.
-        """
-        self.results["title"] = self.results["title"].apply(
-            lambda x: x.split("ISBN:", 1)[0]
-        )
-        return self
-
     def get_filtered_results(self):
         """
         Returns the filtered results.
@@ -153,8 +158,7 @@ class Libgen:
         """
         if self.filtered_results is None:
             raise AutoBookError(
-                """You need to run .filter() before accessing
-            the filtered results"""
+                "You need to run .filter() before getting the filtered results"
             )
         return self.filtered_results
 
@@ -178,23 +182,27 @@ class Libgen:
         str
             A message indicating the result of the download attempt.
         """
-        if self.filtered_results is None:
-            raise AutoBookError(
-                "Filtered results are not available. Please run .filter() first."
-            )
         if row is None:
-            row = self.filtered_results.iloc[0:1]
+            warnings.warn(
+                "No row selected. Using the first row in search results",
+                stacklevel=1,
+            )
+            md5 = self.results.iloc[0:1]["md5"].values[0]
+        else:
+            md5 = row["md5"].values[0]
 
-        mirror_urls = row[["mirror1", "mirror2"]]
+        download_urls = Metadata(timeout=(10, 20)).get_download_links(
+            md5, topic="fiction"
+        )
 
-        for url in mirror_urls:
-            if self._is_mirror_available(url):
+        for url in download_urls:
+            if self._is_link_available(url):
                 return self._download_from_url(url, download_path)
                 break
 
         return "No available mirrors to download from."
 
-    def _is_mirror_available(self, url) -> bool:
+    def _is_link_available(self, url) -> bool:
         """
         Checks if the mirror URL is available.
 
