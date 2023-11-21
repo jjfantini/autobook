@@ -1,5 +1,9 @@
+import os
+from pathlib import Path
 
 import pandas as pd
+import requests
+from autobook.core.constants import PATH_CWD
 from autobook.core.frame import LibgenDataFrame
 from autobook.core.models.abstract.errors import AutoBookError
 from grab_fork_from_libgen import LibgenSearch
@@ -24,7 +28,12 @@ class Libgen:
         If no query string is provided.
     """
 
-    def __init__(self, q=None, topic: Literal["fiction", "sci-tech"] = "fiction"):
+    def __init__(
+        self,
+        q=None,
+        topic: Literal["fiction", "sci-tech"] = "fiction",
+        clean: bool = True,
+    ):
         """
         Constructs a new Libgen object.
 
@@ -35,6 +44,9 @@ class Libgen:
         topic : str, optional
             The topic to search in. Can be either 'fiction' or 'sci-tech'.
             Default is 'fiction'.
+        clean : bool, optional
+            If true, it will try to remove trailing ISBN text from title column.
+            Default is False.
 
         Raises
         ------
@@ -45,6 +57,7 @@ class Libgen:
             raise AutoBookError("You need to enter a query string")
         self.q = q
         self.topic = topic
+        self.clean = clean
 
     def search(self):
         """
@@ -61,6 +74,22 @@ class Libgen:
         res_ol = self.res.get_results()
         self.results = LibgenDataFrame(list(res_ol.values()))
         return self
+
+    def get_results(self):
+        """
+        Returns the search results.
+
+        Raises
+        ------
+        AutoBookError
+            If no search has been performed.
+        """
+        if self.results is None:
+            raise AutoBookError(
+                """You need to run .search() before accessing
+            the results"""
+            )
+        return self.results
 
     def filter(self, author=None, title=None):
         """
@@ -82,6 +111,9 @@ class Libgen:
         DataFrame
             The filtered dataframe.
         """
+        if self.clean:
+            self._clean()
+
         if author:
             # Split the author string into words and create a regex pattern that
             # matches either 'word1 word2' or 'word2, word1'
@@ -93,9 +125,121 @@ class Libgen:
         else:
             author_mask = pd.Series([True] * len(self.results))
         if title:
-            title_mask = self.results["title"].str.contains(title, case=False, regex=True)
+            title_mask = self.results["title"].str.contains(
+                title, case=False, regex=True
+            )
         else:
             title_mask = pd.Series([True] * len(self.results))
-        filtered_df = self.results[author_mask & title_mask]
-        return filtered_df
+        self.filtered_results = self.results[author_mask & title_mask]
+        return self
 
+    def _clean(self):
+        """
+        Cleans the title column by extracting all the text before 'ISBN:' for each row in the dataframe.
+        """
+        self.results["title"] = self.results["title"].apply(
+            lambda x: x.split("ISBN:", 1)[0]
+        )
+        return self
+
+    def get_filtered_results(self):
+        """
+        Returns the filtered results.
+
+        Raises
+        ------
+        AutoBookError
+            If no filter has been applied.
+        """
+        if self.filtered_results is None:
+            raise AutoBookError(
+                """You need to run .filter() before accessing
+            the filtered results"""
+            )
+        return self.filtered_results
+
+    def download_file(
+        self,
+        row: LibgenDataFrame | None = None,
+        download_path: Path = PATH_CWD / "books",
+    ):
+        """
+        Downloads a file from an available mirror URL in the filtered results.
+
+        Parameters
+        ----------
+        download_path : str
+            The path to save the downloaded file.
+        row : LibgenDataFrame
+            A single row of a dataframe that has been selected to be downloaded
+
+        Returns
+        -------
+        str
+            A message indicating the result of the download attempt.
+        """
+        if self.filtered_results is None:
+            raise AutoBookError(
+                "Filtered results are not available. Please run .filter() first."
+            )
+        if row is None:
+            row = self.filtered_results.iloc[0:1]
+
+        mirror_urls = row[["mirror1", "mirror2"]]
+
+        for url in mirror_urls:
+            if self._is_mirror_available(url):
+                return self._download_from_url(url, download_path)
+                break
+
+        return "No available mirrors to download from."
+
+    def _is_mirror_available(self, url) -> bool:
+        """
+        Checks if the mirror URL is available.
+
+        Parameters
+        ----------
+        url : str
+            The URL of the mirror to check.
+
+        Returns
+        -------
+        bool
+            True if the mirror is available, False otherwise.
+        """
+        try:
+            response = requests.head(url, timeout=5)
+            return response.status_code == 200
+        except requests.RequestException:
+            return False
+
+    def _download_from_url(self, url, download_path):
+        """
+        Downloads a file from the given URL.
+
+        Parameters
+        ----------
+        url : str
+            The URL to download the file from.
+        download_path : str
+            The path to save the downloaded file.
+
+        Returns
+        -------
+        str
+            A message indicating the result of the download attempt.
+        """
+        try:
+            response = requests.get(url, stream=True)
+            if response.status_code == 200:
+                file_name = url.split("/")[-1]
+                full_path = os.path.join(download_path, file_name)
+                with open(full_path, "wb") as file:
+                    for chunk in response.iter_content(chunk_size=1024):
+                        file.write(chunk)
+                return f"Download successful: {full_path}"
+            else:
+                return "Error: Unable to download file from the URL."
+        except requests.RequestException as e:
+            raise AutoBookError(f"Error: {e}") from e

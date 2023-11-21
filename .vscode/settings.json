@@ -1,6 +1,6 @@
 {
     "[python]": {
-        "editor.defaultFormatter": "ms-python.charliermarsh.ruff",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,
     },
     "[jsonc]": {
@@ -91,5 +91,7 @@
         "zoomout"
     ],
     "python.analysis.typeCheckingMode": "basic",
-    "workbench.activityBar.orientation": "vertical"
+    "workbench.activityBar.orientation": "vertical",
+    "python.terminal.activateEnvironment": false,
+    "python.terminal.launchArgs": []
 }

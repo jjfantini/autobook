@@ -41,3 +41,16 @@ class LibgenDataFrame(pd.DataFrame):
         for index, row in self.iterrows():
             ordered_dict[index] = row.to_dict()
         return ordered_dict
+
+    def to_polars(self) -> "PolarsDataFrame":
+        """Convert results field to polars dataframe."""
+        try:
+            from polars import (
+                from_pandas,  # pylint: disable=import-outside-toplevel
+            )
+        except ImportError as exc:
+            raise ImportError(
+                "Please install polars: `poetry add polars` to use this function."
+            ) from exc
+
+        return from_pandas(self.reset_index())
