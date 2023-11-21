@@ -33,6 +33,7 @@ grab-fork-from-libgen = "^3.5.0"
 uuid = "^1.30"
 uuid7 = "^0.1.0"
 streamlit = "^1.28.2"
+logger = "^1.4"
 
 
 [tool.poetry.group.dev.dependencies]

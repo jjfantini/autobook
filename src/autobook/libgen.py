@@ -1,9 +1,16 @@
+import logging
+import time
+
 from autobook.core.constants import PATH_CWD
 from autobook.core.frame import LibgenDataFrame
 from autobook.core.models.abstract.errors import AutoBookError
 from grab_fork_from_libgen import LibgenSearch
 from grab_fork_from_libgen.exceptions import LibgenError
+from requests import RequestException
 from typing_extensions import Literal
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class Libgen:
@@ -26,7 +33,7 @@ class Libgen:
 
     def __init__(
         self,
-        q=None,
+        q: str | None = None,
         topic: Literal["fiction", "sci-tech"] = "fiction",
         clean: bool = True,
     ):
@@ -103,8 +110,11 @@ class Libgen:
         """
         return self.get_dataframe()
 
-    def filter_by_author_and_title(
-        self, author: str | None = None, title: str | None = None
+    def filtered_download(
+        self,
+        author: str | None = None,
+        title: str | None = None,
+        download: bool = True,
     ):
         # Initialize an empty list to store matching books
         matching_books = []
@@ -131,19 +141,39 @@ class Libgen:
             ) and (not title or title in actual_title):
                 filters = {"author(s)": actual_author, "title": actual_title}
                 try:
-                    matching_book = res.get(
-                        save_to=PATH_CWD / "books", **filters
-                    )
+                    matching_book = self.res.get(**filters)
                     if matching_book:
                         matching_books.append(matching_book)
+                        break
                 except LibgenError:
                     continue
+                except Exception as e:
+                    raise AutoBookError("Download Failed!") from e
 
-        # If no book was found for any variation of the author's name and title, raise an error
+        # If no book was found for any variation of the author's name and title,
+        # raise an error
         if not matching_books:
             raise LibgenError("No book matches the given author and/or title.")
+        else:
+            self.filtered_results = LibgenDataFrame(
+                matching_books
+            ).clean_title()
 
-        return matching_books
+        if download:
+            retry_count = 0
+            while retry_count < 5:
+                try:
+                    self.res.get(save_to=str(PATH_CWD / "books"), **filters)
+                    logger.info("Download successful.")
+                    # Move all epub files to the books directory
+                    self._move_epub_files()
+                    break
+                except (RequestException, TypeError):
+                    time.sleep(5)
+                    retry_count += 1
+                    logger.info(f"Retrying download...{retry_count}/5")
+
+        return self
 
     def get_filtered_results(self):
         """
@@ -159,3 +189,17 @@ class Libgen:
                 "You need to run .filter() before getting the filtered results"
             )
         return self.filtered_results
+
+    def _move_epub_files(self):
+        """
+        Moves all '.epub' files into the books directory in the project root.
+        """
+        import os
+        import shutil
+
+        for file in os.listdir(PATH_CWD):
+            if file.endswith(".epub"):
+                shutil.move(
+                    os.path.join(PATH_CWD, file),
+                    os.path.join(PATH_CWD, "books", file),
+                )
