@@ -83,8 +83,9 @@ class Libgen:
 
         return self
 
-    def get_dataframe(self):
+    def get_df(self):
         """
+        Alias for get_dataframe method.
         Returns the search results.
 
         Raises
@@ -97,18 +98,6 @@ class Libgen:
                 "You need to run .search() before accessing the results"
             )
         return self.results_df
-
-    def get_df(self):
-        """
-        Alias for get_dataframe method.
-        Returns the search results.
-
-        Raises
-        ------
-        AutoBookError
-            If no search has been performed.
-        """
-        return self.get_dataframe()
 
     def filtered_download(
         self,
@@ -175,7 +164,7 @@ class Libgen:
 
         return self
 
-    def get_filtered_results(self):
+    def get_filtered_df(self):
         """
         Returns the filtered results.
 
@@ -201,5 +190,5 @@ class Libgen:
             if file.endswith(".epub"):
                 shutil.move(
                     os.path.join(PATH_CWD, file),
-                    os.path.join(PATH_CWD, "books", file),
+                    os.path.join(PATH_CWD, "books", "epub", file),
                 )

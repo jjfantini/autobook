@@ -5,7 +5,7 @@ description = "Hyper-modern python package framework."
 authors = ["Jennings Fantini <jennings@humblfinance.io>"]
 readme = "README.md"
 license = "Proprietary"
-keywords = ["python", "package", "template", "modern"]
+keywords = ["python", "epub", "audiobook", "book", "epubconvert", "ebook"]
 packages = [
     { include = "autobook", from = "src" }
 ]
