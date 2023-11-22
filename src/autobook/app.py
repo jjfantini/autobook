@@ -21,30 +21,19 @@ def autobook():
     with container:
         col1, col2 = st.columns(2)
         with col1:
-            query = st.text_input("Search Books", placeholder="Search Query")
+            query = st.text_input("Find a Book", placeholder="Search Query")
         with col2:
             if st.button("Search🔮"):
                 st.session_state.libgen_instance = Libgen(q=query)
                 st.session_state.libgen_instance.search()
                 st.session_state.search_results = (
-                    st.session_state.libgen_instance.get_results()
+                    st.session_state.libgen_instance.get_df()
                 )
 
     # Always display search results if they are available
     if st.session_state.search_results is not None:
-        st.dataframe(st.session_state.search_results)
-
-    # Select row and Download button
-    if st.session_state.filtered_results is not None:
-        selected_row_index = st.selectbox(
-            "Select a row to download:",
-            range(len(st.session_state.filtered_results)),
-        )
-        if st.button("Download"):
-            download_message = st.session_state.libgen_instance.download_file(
-                selected_row_index
-            )
-            st.write(download_message)
+        with st.container():
+            st.dataframe(st.session_state.search_results)
 
 
 if __name__ == "__main__":
