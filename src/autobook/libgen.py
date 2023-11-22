@@ -67,7 +67,8 @@ class Libgen:
 
     def search(self):
         """
-        Performs a search on Libgen.
+        Performs a search on Libgen. Saves the results to a df. Collect with
+        `get_df()`.
 
         Returns
         -------
@@ -76,7 +77,9 @@ class Libgen:
         LibgenSearch
             The LibgenSearch object used to perform the search.
         """
-        self.res = LibgenSearch(self.topic, q=self.q, language="English")
+        self.res = LibgenSearch(
+            self.topic, q=self.q, language="English", format="epub"
+        )
         self.results_df = LibgenDataFrame(list(self.res.get_results().values()))
         if self.clean:
             self.results_df.clean_title()
