@@ -65,7 +65,7 @@ class Libgen:
         self.clean = clean
 
         self.results_df = None
-        self.filtered_results = None
+        self.filtered_results_df = None
 
     def search(self):
         """
@@ -132,6 +132,10 @@ class Libgen:
         DataFrame
             The filtered dataframe.
         """
+        if self.results_df is None:
+            raise AutoBookError(
+                "You need to run .search() before running .filter()"
+            )
 
         if author:
             # Split the author string into words and create a regex pattern that
@@ -163,7 +167,7 @@ class Libgen:
         """
         if self.filtered_results_df is None:
             raise AutoBookError(
-                "You need to run .filter() before getting the filtered results"
+                "No <filtered_results_df> exists! You need to run `.filter()`  before getting the filtered results"  # noqa: E501
             )
         return self.filtered_results_df
 
@@ -192,13 +196,13 @@ class Libgen:
                 "No row selected. Using the first row in search results",
                 stacklevel=1,
             )
-            md5 = self.results.iloc[0:1]["md5"].values[0]
+            md5 = self.results_df.iloc[0:1]["md5"].values[0]
         else:
             md5 = row["md5"].values[0]
 
         download_urls = Metadata(timeout=(10, 20)).get_download_links(
             md5, topic="fiction"
-        )
+        )  # only use IPFS.io and beyond, not the first get
 
         for url in download_urls:
             if self._is_link_available(url):
