@@ -1,3 +1,4 @@
+import logging
 import os
 import warnings
 from pathlib import Path
@@ -9,6 +10,9 @@ from autobook.core.frame import LibgenDataFrame
 from autobook.core.models.abstract.errors import AutoBookError
 from grab_fork_from_libgen import LibgenSearch, Metadata
 from typing_extensions import Literal
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class Libgen:
@@ -31,7 +35,7 @@ class Libgen:
 
     def __init__(
         self,
-        q=None,
+        q: str | None = None,
         topic: Literal["fiction", "sci-tech"] = "fiction",
         clean: bool = True,
     ):
@@ -60,7 +64,7 @@ class Libgen:
         self.topic = topic
         self.clean = clean
 
-        self.results = None
+        self.results_df = None
         self.filtered_results = None
 
     def search(self):
@@ -74,25 +78,26 @@ class Libgen:
         LibgenSearch
             The LibgenSearch object used to perform the search.
         """
-        self.res = LibgenSearch(self.topic, q=self.q, language="English")
-        res_ol = self.res.get_results()
-        self.results = LibgenDataFrame(list(res_ol.values()))
+        self.res = LibgenSearch(
+            self.topic, q=self.q, language="English", format="epub"
+        )
+        self.results_df = LibgenDataFrame(list(self.res.get_results().values()))
 
         if self.clean:
-            self._clean()
+            self._clean_title()
 
         return self
 
-    def _clean(self):
+    def _clean_title(self):
         """
         Cleans the title column by extracting all the text before 'ISBN:' for each row in the dataframe.
         """
-        self.results["title"] = self.results["title"].apply(
+        self.results_df["title"] = self.results_df["title"].apply(
             lambda x: x.split("ISBN:", 1)[0]
         )
         return self
 
-    def get_results(self):
+    def get_df(self):
         """
         Returns the search results.
 
@@ -101,11 +106,11 @@ class Libgen:
         AutoBookError
             If no search has been performed.
         """
-        if self.results is None:
+        if self.results_df is None:
             raise AutoBookError(
                 "You need to run .search() before accessing the results"
             )
-        return self.results
+        return self.results_df
 
     def filter(self, author=None, title=None):
         """
@@ -133,21 +138,21 @@ class Libgen:
             # matches either 'word1 word2' or 'word2, word1'
             words = author.split()
             author_regex = f"{words[0]} {words[1]}|{words[1]}, {words[0]}"
-            author_mask = self.results["author(s)"].str.contains(
+            author_mask = self.results_df["author(s)"].str.contains(
                 author_regex, case=False, regex=True
             )
         else:
-            author_mask = pd.Series([True] * len(self.results))
+            author_mask = pd.Series([True] * len(self.results_df))
         if title:
-            title_mask = self.results["title"].str.contains(
+            title_mask = self.results_df["title"].str.contains(
                 title, case=False, regex=True
             )
         else:
-            title_mask = pd.Series([True] * len(self.results))
-        self.filtered_results = self.results[author_mask & title_mask]
+            title_mask = pd.Series([True] * len(self.results_df))
+        self.filtered_results_df = self.results_df[author_mask & title_mask]
         return self
 
-    def get_filtered_results(self):
+    def get_filtered_df(self):
         """
         Returns the filtered results.
 
@@ -156,11 +161,11 @@ class Libgen:
         AutoBookError
             If no filter has been applied.
         """
-        if self.filtered_results is None:
+        if self.filtered_results_df is None:
             raise AutoBookError(
                 "You need to run .filter() before getting the filtered results"
             )
-        return self.filtered_results
+        return self.filtered_results_df
 
     def download_file(
         self,
