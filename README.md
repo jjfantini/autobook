@@ -8,8 +8,8 @@
 <div align="center">
 
   [![Status](https://img.shields.io/badge/status-active-success.svg)]()
-  [![GitHub Issues](https://img.shields.io/github/issues/jjfantini/humbldata.svg)](https://github.com/jjfantini/humbldata/issues)
-  [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/jjfantini/humbldata.svg)](https://github.com/jjfantini/humbldata/pulls)
+  [![GitHub Issues](https://img.shields.io/github/issues/jjfantini/autobook.svg)](https://github.com/jjfantini/autobook/issues)
+  [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/jjfantini/autobook.svg)](https://github.com/jjfantini/autobook/pulls)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
   [![Python](https://img.shields.io/badge/Python-3.10-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
   ![License](https://img.shields.io/badge/License-Proprietary-black)
@@ -25,22 +25,32 @@
 
 - [About](#about)
 - [Features](#features)
+- [Roadmap](../TODO.md)
 - [Getting Started](#getting_started)
 - [Deployment](#deployment)
 - [Usage](#usage)
 - [Built Using](#built_using)
-- [TODO](../TODO.md)
 - [Contributing](../CONTRIBUTING.md)
 - [Authors](#authors)
 - [Acknowledgments](#acknowledgement)
 
 ## 🧐 __About__ <a name = "about"></a>
 
-Write about 1-2 paragraphs describing the purpose of your project.
+The 'autobook' Python package is designed to transform any text-based book into an audiobook. It utilizes advanced text-to-speech technology to convert written words into spoken language, providing an auditory reading experience. This package is particularly useful for individuals who prefer listening to books, those with visual impairments, or those who wish to enjoy books while performing other tasks. It aims to make literature more accessible and enjoyable in a convenient, user-friendly manner.
 
 ## __Features__ <a name = "features"></a>
 
-- **Package Features**
+- **Download Any Book**
+- **Convert Any Book to speech**
+
+## 🚗 __Roadmap__ <a name = "roadmap"></a>
+- [ ] Add model support for open-source [`coqui tts`](https://github.com/coqui-ai/TTS)
+- [ ] Add model support for elevellabsio
+- [ ] Add ability to view the book in the app
+
+
+
+
 
 ## 🏁 __Getting Started__ <a name = "getting_started"></a>
 
@@ -245,15 +255,17 @@ Add additional notes about how to deploy this on a live system.
 
 ## ⛏️ Built Using <a name = "built_using"></a>
 
-- [OpenBB](https://www.openbb.co/) - Data Source
-- [PostgreSQL](https://postgresql.com/) - Database
 - [Python](https://python.org/) - Programming Language
+- [Poetry](https://python-poetry.org/) - Package Management
+- [ebooklib](https://pypi.org/project/EbookLib/) - Ebook Parsing
+- [BeautifulSoup4](https://pypi.org/project/beautifulsoup4/) - Text Parsing
+- [openai](https://pypi.org/project/openai/) - Speech Generation
 
 ## ✍️ Authors <a name = "authors"></a>
 
 - [@jjfantini](https://github.com/jjfantini) - Idea & Initial work
 
-See also the list of [contributors](https://github.com/jjfantini/humbldata/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/jjfantini/autobook/contributors) who participated in this project.
 
 ## 🎉 Acknowledgements <a name = "acknowledgement"></a>
 
